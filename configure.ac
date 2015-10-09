@@ -293,6 +293,38 @@ AC_CHECK_SIZEOF(unsigned long long, 8)
   
 dnl Checks for libraries.
 
+dnl Tokyo DB
+AC_ARG_WITH(tokyodb, [  --with-tokyodb=DIR      Tokyo DB install area (default=/usr)], tokyodb_prefix="$withval", tokyodb_prefix="none") 
+#TODO: Add additional checks for library, version and header file 
+
+tokyodb_available=Missing
+if test "X$tokyodb_prefix" != "Xnone" -a "X$tokyodb_prefix" != "Xno" -a "X$tokyodb_prefix" != "Xyes"; then
+  AC_MSG_CHECKING([Tokyo DB version])
+  AC_MSG_RESULT(1.0)  #TODO: Add additional checks for version
+
+  tokyodb_lib_dir="$tokyodb_prefix/lib"
+  tokyodb_include_dir="$tokyodb_prefix/include"
+  tokyodb_dbname=tokyocabinet
+
+  nLDFLAGS=$LDFLAGS
+  nCPPFLAGS=
+		
+  if test "$tokyodb_lib_dir" != /usr/lib; then
+    nLDFLAGS="-L$tokyodb_lib_dir";
+  fi
+
+  if test "$tokyodb_include_dir" != /usr/include; then
+    nCPPFLAGS="-I$tokyodb_include_dir";
+  fi
+
+  LIBRDF_LIBS="$LIBRDF_LIBS $nLDFLAGS -l$tokyodb_dbname"
+  LIBRDF_CPPFLAGS="$LIBRDF_CPPFLAGS $nCPPFLAGS"
+  echo "Tokyo DB LIBS: $LIBRDF_LIBS"
+  echo "Tokyo DB CPPFLAGS: $LIBRDF_CPPFLAGS"
+  
+  have_tokyodb=yes
+  tokyodb_available=yes
+fi
 
 dnl Oracle Berkeley DB
 AC_ARG_WITH(bdb, [  --with-bdb=DIR          Oracle Berkeley DB install area (default=/usr)], bdb_prefix="$withval", bdb_prefix="none") 
@@ -580,6 +612,16 @@ digest_modules_available=
 dnl hashes
 HASH_OBJS=
 HASH_SRCS=
+
+AC_MSG_CHECKING(for tokyodb hash support)
+if test "$have_tokyodb" = yes; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_TOKYODB_HASH, 1, [Have tokyodb hash support])
+  HASH_OBJS="$HASH_OBJS rdf_hash_tokyodb.lo"
+  HASH_SRCS="$HASH_SRCS rdf_hash_tokyodb.c"
+else
+  AC_MSG_RESULT(no)
+fi
 
 AC_MSG_CHECKING(for bdb hash support)
 if test "$have_libdb" = yes; then
@@ -1290,6 +1332,7 @@ fi
 
 AC_MSG_RESULT([
   Oracle Berkeley DB (BDB) : $bdb_available
+  Tokyo DB                 : $tokyodb_available
   Triple stores available  : $storages_available
   Triple stores enabled    :$storages_enabled
   RDF parsers              :$rdf_parsers_available

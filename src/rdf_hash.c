@@ -88,6 +88,11 @@ librdf_init_hash(librdf_world *world)
 #ifdef HAVE_BDB_HASH
   librdf_init_hash_bdb(world);
 #endif
+
+#ifdef HAVE_TOKYODB_HASH
+  librdf_init_hash_tokyodb(world);
+#endif
+
   /* Always have hash in memory implementation available */
   librdf_init_hash_memory(world);
 }

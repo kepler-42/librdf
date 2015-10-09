@@ -175,6 +175,10 @@ int librdf_hash_cursor_get_next(librdf_hash_cursor *cursor, librdf_hash_datum *k
 #ifdef HAVE_BDB_HASH
 void librdf_init_hash_bdb(librdf_world *world);
 #endif
+
+#ifdef HAVE_TOKYODB_HASH
+void librdf_init_hash_tokyodb(librdf_world *world);
+#endif
 void librdf_init_hash_memory(librdf_world *world);
 
 
